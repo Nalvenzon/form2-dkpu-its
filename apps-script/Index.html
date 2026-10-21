@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Form SPJ</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f3f4f6; color: #111827; min-height: 100vh;
+    display: flex; align-items: center; justify-content: center; padding: 24px 16px;
+  }
+  .card {
+    background: #fff; width: 100%; max-width: 440px; border-radius: 14px;
+    box-shadow: 0 4px 24px rgba(0,0,0,.06); padding: 28px 24px;
+  }
+  .card h1 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  .card p.subtitle { font-size: 13px; color: #6b7280; margin-bottom: 22px; }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px; }
+  .field label .opt { color: #9ca3af; font-weight: 400; }
+  .field input, .field select, .field textarea {
+    width: 100%; padding: 10px 12px; font-size: 14px; font-family: inherit;
+    border: 1px solid #d1d5db; border-radius: 8px; background: #fff;
+    color: #111827; outline: none; transition: border-color .15s, box-shadow .15s;
+  }
+  .field textarea { resize: vertical; min-height: 70px; }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+  }
+  .field input[type="file"] { padding: 8px; font-size: 13px; color: #6b7280; cursor: pointer; }
+  .field input[type="file"]::file-selector-button {
+    padding: 6px 12px; margin-right: 10px; border: 1px solid #d1d5db;
+    border-radius: 6px; background: #f9fafb; cursor: pointer; font-size: 13px;
+  }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  button[type="submit"] {
+    width: 100%; padding: 11px; margin-top: 8px; font-size: 14px; font-weight: 600;
+    color: #fff; background: #2563eb; border: none; border-radius: 8px;
+    cursor: pointer; transition: background .15s;
+  }
+  button[type="submit"]:hover:not(:disabled) { background: #1d4ed8; }
+  button[type="submit"]:disabled { background: #93c5fd; cursor: not-allowed; }
+  .alert { display: none; padding: 10px 12px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; line-height: 1.4; }
+  .alert.success { display: block; background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+  .alert.error   { display: block; background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+  .alert.info    { display: block; background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>Form Pengajuan</h1>
+  <p class="subtitle">Lengkapi data di bawah ini</p>
+
+  <div id="alert" class="alert"></div>
+
+  <form id="myForm" novalidate>
+    <div class="field">
+      <label for="nama">Nama</label>
+      <input type="text" id="nama" name="nama" placeholder="Masukkan nama" required>
+    </div>
+
+    <div class="field">
+      <label for="spj">SPJ</label>
+      <select id="spj" name="spj" required>
+        <option value="" disabled selected>Pilih SPJ</option>
+        <option value="Pengiriman">Pengiriman</option>
+        <option value="Perjalanan Dinas Lokal">Perjalanan Dinas Lokal</option>
+        <option value="Perjalanan Luar Kota">Perjalanan Luar Kota</option>
+        <option value="Belanja">Belanja</option>
+         <option value="Lain Lain">Lain Lain</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="vendor">Vendor</label>
+      <input type="text" id="vendor" name="vendor" placeholder="Contoh: Indomaret Sakinah / Toko Bangunan" required>
+    </div>
+
+    <div class="grid-2">
+      <div class="field">
+        <label for="tanggal">Tanggal</label>
+        <input type="date" id="tanggal" name="tanggal" required>
+      </div>
+      <div class="field">
+        <label for="nominal">Nominal</label>
+        <input type="number" id="nominal" name="nominal" placeholder="0" min="0" required>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="keterangan">Keterangan</label>
+      <textarea id="keterangan" name="keterangan" rows="3" placeholder="Tulis keterangan (opsional)"></textarea>
+    </div>
+
+    <div class="field">
+      <label for="upload">Upload Bukti <span class="opt">(opsional)</span></label>
+      <input type="file" id="upload" name="upload" accept="image/*">
+    </div>
+
+    <button type="submit" id="btnSubmit">Kirim</button>
+  </form>
+</div>
+
+<script>
+  // GANTI DENGAN URL WEB APP ANDA
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzbIKLl4WLPpR4ii6ciBZgz7cLKfBhtkFHxK3u5LhdYWkEtWVXTszZNpDHL_dEdwNM/exec'; 
+  
+  const form     = document.getElementById('myForm');
+  const alertBox = document.getElementById('alert');
+  const btn      = document.getElementById('btnSubmit');
+
+  const hariIni = new Date();
+  hariIni.setMinutes(hariIni.getMinutes() - hariIni.getTimezoneOffset());
+  document.getElementById('tanggal').max = hariIni.toISOString().split('T')[0];
+
+
+  function showAlert(type, msg) {
+    alertBox.className = 'alert ' + type;
+    alertBox.innerHTML = msg;
+    if (type !== 'info') setTimeout(() => { alertBox.className = 'alert'; }, 6000);
+  }
+
+  function validate() {
+    if (!form.nama.value.trim())   return 'Nama wajib diisi';
+    if (!form.spj.value)           return 'SPJ wajib dipilih';
+    if (!form.vendor.value)        return 'Vendor wajib diisi';
+    if (!form.tanggal.value)       return 'Tanggal wajib diisi';
+    if (form.nominal.value === '') return 'Nominal wajib diisi';
+    return null;
+  }
+
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    alertBox.className = 'alert';
+
+    if (!SCRIPT_URL || SCRIPT_URL.includes('URL_APLIKASI_WEB_ANDA_DI_SINI')) {
+      showAlert('error', '<b>URL Web App belum diisi.</b>');
+      return;
+    }
+
+    const err = validate();
+    if (err) { showAlert('error', err); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Mengirim...';
+    showAlert('info', 'Mengirim data...');
+
+    try {
+      const params = new URLSearchParams();
+      for (const [key, value] of new FormData(form).entries()) {
+        params.append(key, value);
+      }
+
+      const fileInput = document.getElementById('upload');
+      if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const base64 = await fileToBase64(file);
+        params.append('upload_base64', base64);
+        params.append('upload_name', file.name);
+      }
+
+      const res = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString()
+      });
+
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (parseErr) {
+        throw new Error('Respons bukan JSON. Kemungkinan deployment belum "Siapa saja".');
+      }
+
+      if (data.result === 'success') {
+        showAlert('success', '✓ Data & Gambar berhasil dikirim');
+        form.reset();
+      } else {
+        showAlert('error', 'Gagal: ' + (data.message || 'tidak diketahui'));
+      }
+
+    } catch (err) {
+      console.error('[FORM ERROR]', err);
+      showAlert('error', '<b>Gagal mengirim.</b><br>' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Kirim';
+    }
+  });
+</script>
+
+</body>
+</html>
